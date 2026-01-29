@@ -1,0 +1,14 @@
+{
+  "name": "youtube-clone",
+  "version": "1.0.0",
+  "description": "This project is a YouTube Clone built with a strong emphasis on backend architecture, APIs, and system design, while keeping the frontend minimal and functional. The goal of this project is to understand how large-scale video platforms work behind the scenes—from authentication to video management and data handling.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "backend"
+  ],
+  "author": "Bhavya Jain",
+  "license": "ISC"
+}
