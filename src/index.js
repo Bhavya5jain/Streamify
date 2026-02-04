@@ -5,7 +5,7 @@ import cors from "cors";
 import express from "express"
 
 app.use(cors({
-    origin:process.env.CORS_ORIGIN,
+    origin:process.env.CORS_ORIGIN, //frontend ka path dalna hai to frontend se req le sakta hai cors policy nahi tutegi
 }))
 
 app.use(express.json({limit:"16kb"}));
