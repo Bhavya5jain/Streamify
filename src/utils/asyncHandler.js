@@ -1,8 +1,8 @@
 const asyncHandler = (RequestHandler) => {
-    (req,res,next)=>{
+    return (req,res,next)=>{
         Promise
-        .resolve(RequestHandler(req,res,nect))
-        .reject((error)=>{console.log(error.message)})
+        .resolve(RequestHandler(req,res,next))
+        .catch((error)=>{console.log(error.message)})
     }
 }
 
@@ -10,7 +10,7 @@ export {asyncHandler};
 
 // Samajhne ke liye
 
-// const asyncHandler = (fn) => async () => {
+// const asyncHandler = (fn) => async (req,res) => {
 //     try {
 //         await fn(req,res,next)
 //     } catch (error) {
@@ -20,3 +20,5 @@ export {asyncHandler};
 //         })
 //     }
 // }
+
+// export {asyncHandler};

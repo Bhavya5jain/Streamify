@@ -1,6 +1,7 @@
 import mongoose from "mongoose";
 import bcrypt from "bcrypt"
 import jwt from "jsonwebtoken"
+import {Video} from "./video.model.js"
 
 const userSchema = new mongoose.Schema({
     watchHistory:[{
@@ -28,7 +29,7 @@ const userSchema = new mongoose.Schema({
         trim:true,
         index:true
     },
-    avatar:{
+    avtar:{
         type:String,
         required:true,
     },
@@ -48,9 +49,9 @@ const userSchema = new mongoose.Schema({
 userSchema.pre("save", async function(next){
     if(this.isModified("password")){
         this.password=await bcrypt.hash(this.password,10)
-        next();
+        next;
     }
-    next();
+    next;
 }) //Use function for this refference insteed of arrow function
 
 userSchema.methods.isPasswordCorrect= async function(password){
