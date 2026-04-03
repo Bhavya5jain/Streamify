@@ -202,7 +202,7 @@ const refreshAccessToken = asyncHandler(async(req,res)=>{
 
     const {refreshToken , accessToken } = await generateRefreshAndAccessTocken(_id);
 
-    if(oldrefreshToken !== refreshToken){
+    if(oldrefreshToken !== user.refreshToken){
         throw new apiError(400,"refresh token is expired or used");
     }
 
