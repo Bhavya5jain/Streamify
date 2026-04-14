@@ -1,5 +1,6 @@
 import {v2 as cloudinary} from 'cloudinary';
 import fs from "fs"
+import { asyncHandler } from './asyncHandler.js';
 
 cloudinary.config({ 
     cloud_name: process.env.CLOUDINARY_CLOUD_NAME, 
@@ -25,5 +26,14 @@ const uploadOnCloudinary = async (localFilePath) => {
     }
 }
 
+const deleteFromCloudinary = asyncHandler(async(oldAvatarUrl)=>{
+    const parts = oldAvatarUrl.split("/upload/")[1];
+    const withoutVersion = parts.split("/").slice(1).join("/");
+    const publicId = withoutVersion.split(".")[0];
+    const response = await cloudinary.uploader.destroy(publicId);
+    return response;
 
-export {uploadOnCloudinary};
+})
+
+
+export {uploadOnCloudinary , deleteFromCloudinary};

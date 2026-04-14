@@ -3,7 +3,7 @@ import { asyncHandler } from "../utils/asyncHandler.js";
 import jwt from "jsonwebtoken";
 import { User } from "../models/user.model.js";
 
-export const authMiddleware = asyncHandler(async(req,resizeBy,next)=>{
+export const authMiddleware = asyncHandler(async(req,res,next)=>{
 
     try {
         const token = req.cookies?.accessToken || req.header("Authorization")?.replace("Bearer ","");
@@ -16,7 +16,7 @@ export const authMiddleware = asyncHandler(async(req,resizeBy,next)=>{
     
         const {_id,email} = decodedToken;
     
-        const user = User.findById(_id).select("-paasword -refreshToken");
+        const user = await User.findById(_id).select("-paasword -refreshToken");
         if(!user){
             throw new apiError(400,"UnAuthorized Access");
         }

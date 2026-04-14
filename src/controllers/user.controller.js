@@ -2,10 +2,9 @@ import {asyncHandler} from '../utils/asyncHandler.js';
 import {User} from "../models/user.model.js"
 import { DB_NAME } from '../constants.js';
 import {apiError} from "../utils/apiError.js";
-import { uploadOnCloudinary } from '../utils/cloudinary.js';
+import { uploadOnCloudinary , deleteFromCloudinary } from '../utils/cloudinary.js';
 import {apiResponse} from "../utils/apiResponse.js"
 import jwt from "jsonwebtoken"; 
-
 
 const generateRefreshAndAccessTocken = async function(userId){
     try {
@@ -215,4 +214,249 @@ const refreshAccessToken = asyncHandler(async(req,res)=>{
     )
 })
 
-export {registerUser, loginUser , LogOutUser ,refreshAccessToken};
+const changeCurrentPassword = asyncHandler(async(req,res)=>{
+    const user = await User.findById(req.user._id);
+    const oldPassword = req.body.oldPassword;
+    const newPassword = req.body.newPassword;
+
+    if(await user.isPasswordCorrect(oldPassword)){
+        user.password = newPassword;
+    }else{
+        throw new apiError(400,"Invalid oldPassword");
+    }
+
+    await user.save({validateBeforeSave:false});
+
+    return res
+    .status(200)
+    .json(new apiResponse(200,"Successfully changed old password"))
+})
+
+const getCurrentUser = asyncHandler(async(req,res)=>{
+    return res
+    .status(200)
+    .json(new apiResponse(200,"User details",req.user))
+})
+
+const updateAccountDetails = asyncHandler(async(req,res)=>{
+    const {_id} = req.user;
+    if(req.body?.password){
+        throw new apiError(400 , "could not change password");
+    }
+
+    const user = await User.findByIdAndUpdate(_id,
+        {
+            $set:{
+                ...req.body
+            }
+        },
+        {
+            new: true,
+            runValidators: true
+        }
+    ).select("-password")
+
+    return res.status(200),json(200,"Successfully updated data",user)
+
+})
+
+const updateUserAvatar = asyncHandler(async(req,res)=>{
+    const avatarLocalPath = req.files?.avatar?.[0]?.path;
+
+    const oldAvatarUrl = req.user.avatar;
+
+    if(!avatarLocalPath){
+        throw new apiError(400,"error in updating through multer in controler");
+    }
+
+
+    const avatar =await uploadOnCloudinary(avatarLocalPath);
+
+    if(!avatar.url){
+        throw new apiError(400,"error in updating on cloundary in controller")
+    }
+
+    const deleteResponse = await deleteFromCloudinary(oldAvatarUrl)
+    console.log("Old image deleated successfully");
+
+    const user =await User.findByIdAndUpdate(
+        req.user._id,
+        {
+            $set:{
+                avtar:avatar.url
+            }
+        }
+    ).select("-password")
+
+    return res.status(200)
+    .json(new apiResponse(200,"Successfully updated avtar",user))
+})
+
+const updateUsercoverImage = asyncHandler(async(req,res)=>{
+    const coverImageLocalPath = req.files?.coverImage[0]?.path;
+    const oldcoverImageUrl = req.user.coverImage;
+
+    if(!coverImageLocalPath){
+        throw new apiError(400,"error in updating through multer in controler");
+    }
+
+    const coverImage = await uploadOnCloudinary(coverImageLocalPath);
+
+    if(!coverImage.url){
+        throw new apiError(400,"error in updating on cloundary in controller")
+    }
+
+    const deleteResponse = await deleteFromCloudinary(oldcoverImageUrl);
+    console.log("Old image deleated successfully");
+
+    const user =await User.findByIdAndUpdate(
+        req.user._id,
+        {
+            $set:{
+                coverImage:coverImage.url
+            }
+        }
+    ).select("-password")
+
+    return res.status(200)
+    .json(new apiResponse(200,"Successfully updated cover image",user))
+})
+
+const changePassword = asyncHandler(async(req,res)=>{
+    const {newPassword , conformNewPassword} = req.body;
+    if(newPassword !== conformNewPassword){
+        throw new apiError(400,"new Password and Conform New Password is mismatched");
+    }
+    const user = await User.findOne({email : req.body.email})
+    await User.findOneAndUpdate(user._id,{
+        $set:{password:newPassword}
+    },{
+        new:true,
+    })
+    res.status(200)
+    .json(new apiResponse(200,"change password Successfully"));
+})
+
+const getUserChannelProfile = asyncHandler(async(req,res)=>{
+    const {username} = req.params;
+    console.log(username)
+    console.log(req.user._id)
+    if(!username?.trim()){
+        throw new apiError(400,"Username is required");
+    }
+    try {
+        const channel = await User.aggregate([
+            {
+                $match : {
+                    username:username
+                }
+            },
+            {
+                $lookup: {
+                from: "subscriptions",
+                localField: "_id",
+                foreignField: "channel",
+                as: "Subscribers"
+                }
+            },
+            {
+                $lookup: {
+                from: "subscriptions",
+                localField: "_id",
+                foreignField: "subscriber",
+                as: "subscribed to"
+                }
+            },
+            {
+                $addFields: {
+                    subscribersCount: {
+                        $size:"$Subscribers"
+                    },
+                    channelsSubscribed : {
+                        $size:"$subscribed to"
+                    },
+                    isSubscribed : {
+                        $cond : {
+                        if : {$in:[req.user._id,"$Subscribers.subscriber"]},
+                        then : true ,
+                        else : false
+                        }
+                    }
+                }
+            },
+            {
+                $project: {
+                fullName:1,
+                username:1,
+                subscribersCount:1,
+                channelsSubscribed:1,
+                isSubscribed:1,
+                avtar:1,
+                coverImage:1,
+                email:1
+                }
+            }
+        ])
+        console.log(channel)
+        if(!channel?.length){
+            throw new apiError(404,"Channel not found with the given username",error.message);
+        }
+        res.status(200).json(new apiResponse(200,"Channel details",channel[0]));
+    } catch (error) {
+        throw new apiError(500,"Error while fetching channel details",error.message); 
+    }
+})
+
+const getWatchHistory = asyncHandler(async(req,res)=>{
+    try {
+        const user = await User.aggregate([
+            {
+                $match : {
+                    _id : new mongoose.Types.ObjectId(req.user._id)
+                }
+            },{
+                $lookup : {
+                    from : "videos",
+                    localField : "watchHistory",
+                    foreignField : "_id",
+                    as : "watchHistory",
+                    pipeline : [
+                        {
+                        $lookup:{
+                            from:"users",
+                            localField:"owner",
+                            foreignField:"_id",
+                            as : "owner2",
+                            pipeline : [
+                            {
+                                $project : {
+                                fullName:1,
+                                username:1,
+                                avtar:1
+                                }
+                            }
+                            ]
+                        }
+                        },
+                        {
+                        $addField : {
+                            owner : {
+                            $first : "$owner2"
+                            }
+                        }
+                        }
+                    ]
+                }
+            }
+        ])
+    
+        if (!user.length) {
+            throw new apiError(404, "User not found")
+        }
+    return res.status(200).json(new apiResponse(200,"User watch history",user[0].watchHistory))
+    } catch (error) {
+        throw new apiError(500,"Error while fetching watch history",error.message);
+    }
+})
+
+export {registerUser, loginUser , LogOutUser ,refreshAccessToken ,changeCurrentPassword ,getCurrentUser ,updateAccountDetails,updateUserAvatar,updateUsercoverImage ,changePassword ,getUserChannelProfile ,getWatchHistory};
