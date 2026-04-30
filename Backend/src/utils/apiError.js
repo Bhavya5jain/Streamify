@@ -1,4 +1,3 @@
-
 class apiError extends Error{
     constructor(statusCode=500,message="Something went wrong",errors=[],stack){
         super(message)

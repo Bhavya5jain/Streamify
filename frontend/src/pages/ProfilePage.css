@@ -1,0 +1,360 @@
+/* Profile Page Styles */
+.profile-page {
+  padding-bottom: 48px;
+}
+
+/* Banner */
+.profile-banner {
+  position: relative;
+  height: 260px;
+  overflow: hidden;
+  background: var(--bg-tertiary);
+}
+
+.banner-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.banner-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to bottom, transparent 40%, rgba(8,8,8,0.8) 100%);
+}
+
+.banner-edit-btn {
+  position: absolute;
+  bottom: 16px;
+  right: 16px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  background: rgba(0,0,0,0.6);
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(255,255,255,0.15);
+  border-radius: var(--radius-full);
+  color: white;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: var(--transition);
+  font-family: inherit;
+}
+
+.banner-edit-btn:hover {
+  background: rgba(0,0,0,0.8);
+}
+
+/* Profile Header */
+.profile-header {
+  display: flex;
+  gap: 24px;
+  align-items: flex-start;
+  margin-top: -64px;
+  position: relative;
+  z-index: 2;
+  margin-bottom: 32px;
+}
+
+.profile-avatar-wrap {
+  position: relative;
+  flex-shrink: 0;
+}
+
+.profile-avatar {
+  border: 4px solid var(--bg-primary);
+  box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+}
+
+.avatar-edit-btn {
+  position: absolute;
+  bottom: 4px;
+  right: 4px;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: var(--accent-red);
+  color: white;
+  border: 2px solid var(--bg-primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.avatar-edit-btn:hover {
+  background: var(--accent-red-hover);
+}
+
+.profile-info {
+  flex: 1;
+  margin-top: 72px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.profile-name-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.profile-name {
+  font-size: 24px;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.profile-verified {
+  color: var(--accent-purple-light);
+}
+
+.profile-edit-btn {
+  padding: 8px 16px;
+  font-size: 13px;
+}
+
+.profile-handle {
+  font-size: 14px;
+  color: var(--text-muted);
+}
+
+.profile-stats {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.profile-stat {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.stat-val {
+  font-size: 18px;
+  font-weight: 800;
+  color: var(--text-primary);
+}
+
+.stat-lbl {
+  font-size: 12px;
+  color: var(--text-muted);
+  font-weight: 500;
+}
+
+.profile-stat-divider {
+  width: 1px;
+  height: 32px;
+  background: var(--border-subtle);
+}
+
+.profile-bio {
+  font-size: 14px;
+  color: var(--text-secondary);
+  line-height: 1.6;
+  max-width: 480px;
+}
+
+.profile-meta {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.profile-meta-item {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 13px;
+  color: var(--text-muted);
+}
+
+.profile-link {
+  color: var(--accent-purple-light);
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+.profile-link:hover {
+  color: var(--accent-purple);
+}
+
+.profile-actions {
+  margin-top: 72px;
+  flex-shrink: 0;
+}
+
+/* Tabs */
+.profile-tabs {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  border-bottom: 1px solid var(--border-subtle);
+  margin-bottom: 28px;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.profile-tabs::-webkit-scrollbar {
+  display: none;
+}
+
+.profile-tab {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 20px;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-muted);
+  border-bottom: 2px solid transparent;
+  margin-bottom: -1px;
+  transition: var(--transition);
+  cursor: pointer;
+  white-space: nowrap;
+  font-family: inherit;
+  background: none;
+  border-top: none;
+  border-left: none;
+  border-right: none;
+}
+
+.profile-tab:hover {
+  color: var(--text-primary);
+}
+
+.profile-tab.active {
+  color: var(--accent-red);
+  border-bottom-color: var(--accent-red);
+}
+
+/* Playlists */
+.playlist-card {
+  text-decoration: none;
+  overflow: hidden;
+}
+
+.playlist-thumb-wrap {
+  position: relative;
+  aspect-ratio: 16/9;
+  overflow: hidden;
+}
+
+.playlist-thumb {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.3s ease;
+}
+
+.playlist-card:hover .playlist-thumb {
+  transform: scale(1.05);
+}
+
+.playlist-count-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(0,0,0,0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  color: white;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.playlist-info {
+  padding: 12px 16px 14px;
+}
+
+.playlist-name {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 4px;
+}
+
+.playlist-updated {
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+/* Tweets tab */
+.tweets-tab {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  max-width: 640px;
+}
+
+/* Settings */
+.settings-tab {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  max-width: 640px;
+}
+
+.settings-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+  padding: 24px;
+}
+
+.settings-card-title {
+  font-size: 15px;
+  font-weight: 700;
+  margin-bottom: 20px;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.settings-form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.danger-zone {
+  border-color: rgba(248, 113, 113, 0.2);
+  background: rgba(248, 113, 113, 0.03);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .profile-banner {
+    height: 160px;
+  }
+
+  .profile-header {
+    flex-direction: column;
+    margin-top: -48px;
+    gap: 16px;
+  }
+
+  .profile-info {
+    margin-top: 0;
+  }
+
+  .profile-actions {
+    margin-top: 0;
+    width: 100%;
+  }
+
+  .profile-name-row {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}

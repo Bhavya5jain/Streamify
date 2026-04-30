@@ -1,0 +1,134 @@
+.subscriptions-page {
+  padding-top: 24px;
+  padding-bottom: 48px;
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+.subscriptions-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 32px;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.subscriptions-title {
+  font-size: 26px;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.subscriptions-subtitle {
+  font-size: 14px;
+  color: var(--text-muted);
+  margin-top: 4px;
+  margin-left: 40px;
+}
+
+.subs-search {
+  width: 280px;
+}
+
+.subs-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.sub-card {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  padding: 20px;
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+  transition: var(--transition);
+}
+
+.sub-card:hover {
+  background: var(--bg-glass);
+}
+
+.sub-avatar {
+  width: 88px;
+  height: 88px;
+  border-radius: 50%;
+  object-fit: cover;
+  flex-shrink: 0;
+}
+
+.sub-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.sub-name {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--text-primary);
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  transition: color 0.2s ease;
+}
+
+.sub-name:hover {
+  color: var(--accent-red);
+}
+
+.sub-meta {
+  font-size: 13px;
+  color: var(--text-muted);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.sub-desc {
+  font-size: 14px;
+  color: var(--text-secondary);
+  line-height: 1.5;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.sub-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-shrink: 0;
+}
+
+.notif-btn {
+  color: var(--text-muted);
+}
+
+.notif-btn:hover {
+  color: var(--text-primary);
+}
+
+@media (max-width: 640px) {
+  .sub-card {
+    flex-direction: column;
+    text-align: center;
+  }
+
+  .sub-info {
+    align-items: center;
+  }
+
+  .sub-actions {
+    width: 100%;
+    justify-content: center;
+  }
+}

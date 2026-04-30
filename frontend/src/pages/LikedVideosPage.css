@@ -1,0 +1,314 @@
+/* Liked Videos Page */
+.liked-page {
+  padding-top: 0;
+  padding-bottom: 48px;
+}
+
+/* Hero */
+.liked-hero {
+  position: relative;
+  border-radius: 0 0 var(--radius-xl) var(--radius-xl);
+  overflow: hidden;
+  margin-bottom: 24px;
+  margin-left: -28px;
+  margin-right: -28px;
+}
+
+.liked-hero-bg {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, rgba(255,0,64,0.3) 0%, rgba(124,58,237,0.25) 100%);
+  backdrop-filter: blur(40px);
+}
+
+.liked-hero-content {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  padding: 32px 28px;
+  flex-wrap: wrap;
+}
+
+.liked-hero-icon {
+  width: 80px;
+  height: 80px;
+  border-radius: var(--radius-xl);
+  background: var(--gradient-primary);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  box-shadow: var(--shadow-glow-red);
+}
+
+.liked-hero-text {
+  flex: 1;
+}
+
+.liked-title {
+  font-size: 28px;
+  font-weight: 800;
+  color: var(--text-primary);
+}
+
+.liked-subtitle {
+  font-size: 13px;
+  color: var(--text-secondary);
+  margin-top: 4px;
+}
+
+.liked-hero-actions {
+  display: flex;
+  gap: 10px;
+  flex-shrink: 0;
+}
+
+/* Toolbar */
+.liked-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+}
+
+.liked-toolbar-left {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.toolbar-label {
+  font-size: 13px;
+  color: var(--text-muted);
+  font-weight: 600;
+  margin-right: 4px;
+}
+
+.liked-toolbar-right {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.view-active {
+  background: rgba(255, 0, 64, 0.1) !important;
+  color: var(--accent-red) !important;
+  border-color: rgba(255, 0, 64, 0.3) !important;
+}
+
+/* Grid — unlike button overlay */
+.liked-card-wrap {
+  position: relative;
+}
+
+.unlike-btn {
+  position: absolute;
+  bottom: 56px;
+  right: 8px;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 10px;
+  background: rgba(255, 0, 64, 0.85);
+  color: white;
+  border: none;
+  border-radius: var(--radius-full);
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+  opacity: 0;
+  transition: var(--transition);
+  font-family: inherit;
+  backdrop-filter: blur(4px);
+  z-index: 10;
+}
+
+.liked-card-wrap:hover .unlike-btn {
+  opacity: 1;
+}
+
+/* List view */
+.liked-list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.liked-list-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 12px;
+  border-radius: var(--radius-md);
+  transition: var(--transition);
+  border: 1px solid transparent;
+}
+
+.liked-list-item:hover {
+  background: var(--bg-glass);
+  border-color: var(--border-subtle);
+}
+
+.liked-list-index {
+  font-size: 13px;
+  color: var(--text-muted);
+  width: 24px;
+  text-align: center;
+  flex-shrink: 0;
+}
+
+.liked-list-thumb {
+  position: relative;
+  width: 160px;
+  aspect-ratio: 16/9;
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+  flex-shrink: 0;
+  display: block;
+}
+
+.liked-list-thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.3s ease;
+}
+
+.liked-list-item:hover .liked-list-thumb img {
+  transform: scale(1.05);
+}
+
+.liked-list-duration {
+  position: absolute;
+  bottom: 4px;
+  right: 4px;
+  background: rgba(0, 0, 0, 0.85);
+  color: white;
+  font-size: 11px;
+  font-weight: 600;
+  padding: 1px 5px;
+  border-radius: 3px;
+}
+
+.liked-list-info {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.liked-list-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-primary);
+  text-decoration: none;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  line-height: 1.4;
+  transition: color 0.2s ease;
+}
+
+.liked-list-title:hover {
+  color: var(--accent-red);
+}
+
+.liked-list-meta {
+  font-size: 12px;
+  color: var(--text-muted);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.liked-at {
+  font-size: 12px;
+  color: var(--text-muted);
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.unlike-btn-list {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--accent-red);
+  cursor: pointer;
+  opacity: 0;
+  transition: var(--transition);
+  flex-shrink: 0;
+}
+
+.liked-list-item:hover .unlike-btn-list {
+  opacity: 1;
+}
+
+.unlike-btn-list:hover {
+  background: rgba(255, 0, 64, 0.1);
+}
+
+/* Empty state */
+.liked-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  padding: 80px 20px;
+  text-align: center;
+}
+
+.liked-empty-icon {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  background: rgba(255, 0, 64, 0.08);
+  color: var(--accent-red);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 8px;
+}
+
+.liked-empty h2 {
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.liked-empty p {
+  font-size: 14px;
+  color: var(--text-muted);
+  max-width: 360px;
+  line-height: 1.6;
+}
+
+@media (max-width: 768px) {
+  .liked-hero {
+    margin-left: -16px;
+    margin-right: -16px;
+  }
+
+  .liked-hero-content {
+    padding: 24px 16px;
+    gap: 16px;
+  }
+
+  .liked-list-thumb {
+    width: 120px;
+  }
+
+  .liked-at {
+    display: none;
+  }
+}
