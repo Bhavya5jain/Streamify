@@ -3,7 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import {
   Search, Bell, Upload, Menu, X, ChevronDown,
   Settings, LogOut, User, LayoutDashboard, Bookmark,
-  CheckCircle2
+  CheckCircle2, LogIn
 } from 'lucide-react';
 import { mockNotifications, currentUser } from '../data/mockData';
 import './Navbar.css';
@@ -18,6 +18,8 @@ const Navbar: React.FC<NavbarProps> = ({ onMenuClick, sidebarOpen }) => {
   const [showNotifications, setShowNotifications] = useState(false);
   const [showUserMenu, setShowUserMenu] = useState(false);
   const [showUploadModal, setShowUploadModal] = useState(false);
+  // TODO: replace with real auth context during integration
+  const [isLoggedIn] = useState(true);
   const navigate = useNavigate();
   const notifRef = useRef<HTMLDivElement>(null);
   const userRef = useRef<HTMLDivElement>(null);
@@ -91,14 +93,16 @@ const Navbar: React.FC<NavbarProps> = ({ onMenuClick, sidebarOpen }) => {
         </form>
 
         <div className="navbar-right">
-          <button
-            className="btn btn-primary upload-btn"
-            onClick={() => navigate('/upload')}
-            id="upload-nav-btn"
-          >
-            <Upload size={16} />
-            <span>Upload</span>
-          </button>
+          {isLoggedIn && (
+            <button
+              className="btn btn-primary upload-btn"
+              onClick={() => navigate('/upload')}
+              id="upload-nav-btn"
+            >
+              <Upload size={16} />
+              <span>Upload</span>
+            </button>
+          )}
 
           {/* Notifications */}
           <div className="notif-wrapper" ref={notifRef}>
@@ -142,50 +146,57 @@ const Navbar: React.FC<NavbarProps> = ({ onMenuClick, sidebarOpen }) => {
             )}
           </div>
 
-          {/* User Menu */}
-          <div className="user-menu-wrapper" ref={userRef}>
-            <button
-              className="user-avatar-btn"
-              onClick={() => setShowUserMenu(!showUserMenu)}
-              id="user-avatar-btn"
-              aria-label="User menu"
-            >
-              <img src={currentUser.avatar} alt={currentUser.name} className="avatar avatar-sm" />
-              <ChevronDown size={14} className={`chevron ${showUserMenu ? 'open' : ''}`} />
-            </button>
+          {/* User Menu / Sign In */}
+          {isLoggedIn ? (
+            <div className="user-menu-wrapper" ref={userRef}>
+              <button
+                className="user-avatar-btn"
+                onClick={() => setShowUserMenu(!showUserMenu)}
+                id="user-avatar-btn"
+                aria-label="User menu"
+              >
+                <img src={currentUser.avatar} alt={currentUser.name} className="avatar avatar-sm" />
+                <ChevronDown size={14} className={`chevron ${showUserMenu ? 'open' : ''}`} />
+              </button>
 
-            {showUserMenu && (
-              <div className="dropdown user-dropdown" id="user-menu-dropdown">
-                <div className="user-menu-header">
-                  <img src={currentUser.avatar} alt={currentUser.name} className="avatar avatar-md" />
-                  <div>
-                    <div className="user-menu-name">{currentUser.name}</div>
-                    <div className="user-menu-handle">{currentUser.handle}</div>
+              {showUserMenu && (
+                <div className="dropdown user-dropdown" id="user-menu-dropdown">
+                  <div className="user-menu-header">
+                    <img src={currentUser.avatar} alt={currentUser.name} className="avatar avatar-md" />
+                    <div>
+                      <div className="user-menu-name">{currentUser.name}</div>
+                      <div className="user-menu-handle">{currentUser.handle}</div>
+                    </div>
                   </div>
+                  <hr className="divider" />
+                  <Link to="/profile" className="dropdown-item" id="profile-menu-item">
+                    <User size={16} /> Your Channel
+                  </Link>
+                  <Link to="/dashboard" className="dropdown-item" id="dashboard-menu-item">
+                    <LayoutDashboard size={16} /> Creator Studio
+                  </Link>
+                  <Link to="/saved" className="dropdown-item" id="saved-menu-item">
+                    <Bookmark size={16} /> Saved Playlists
+                  </Link>
+                  <Link to="/admin" className="dropdown-item" id="admin-menu-item">
+                    <CheckCircle2 size={16} /> Admin Panel
+                  </Link>
+                  <hr className="divider" />
+                  <Link to="/settings" className="dropdown-item" id="settings-menu-item">
+                    <Settings size={16} /> Settings
+                  </Link>
+                  <button className="dropdown-item danger" id="logout-menu-item">
+                    <LogOut size={16} /> Sign Out
+                  </button>
                 </div>
-                <hr className="divider" />
-                <Link to="/profile" className="dropdown-item" id="profile-menu-item">
-                  <User size={16} /> Your Channel
-                </Link>
-                <Link to="/dashboard" className="dropdown-item" id="dashboard-menu-item">
-                  <LayoutDashboard size={16} /> Creator Studio
-                </Link>
-                <Link to="/saved" className="dropdown-item" id="saved-menu-item">
-                  <Bookmark size={16} /> Saved Playlists
-                </Link>
-                <Link to="/admin" className="dropdown-item" id="admin-menu-item">
-                  <CheckCircle2 size={16} /> Admin Panel
-                </Link>
-                <hr className="divider" />
-                <Link to="/settings" className="dropdown-item" id="settings-menu-item">
-                  <Settings size={16} /> Settings
-                </Link>
-                <button className="dropdown-item danger" id="logout-menu-item">
-                  <LogOut size={16} /> Sign Out
-                </button>
-              </div>
-            )}
-          </div>
+              )}
+            </div>
+          ) : (
+            <Link to="/login" className="btn btn-signin" id="signin-nav-btn">
+              <LogIn size={16} />
+              <span>Sign In</span>
+            </Link>
+          )}
         </div>
       </nav>
     </>

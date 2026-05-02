@@ -20,8 +20,13 @@ import AnalyticsPage from './pages/AnalyticsPage';
 import SubscriptionsPage from './pages/SubscriptionsPage';
 import SettingsPage from './pages/SettingsPage';
 import HelpPage from './pages/HelpPage';
+import LoginPage from './pages/LoginPage';
+import RegisterPage from './pages/RegisterPage';
 
 const SIDEBAR_KEY = 'streamify_sidebar';
+
+// Auth pages — no Navbar/Sidebar on these
+const AUTH_ROUTES = ['/login', '/register'];
 
 function AppLayout() {
   const [sidebarOpen, setSidebarOpen] = useState(() => {
@@ -31,6 +36,7 @@ function AppLayout() {
 
   const location = useLocation();
   const isWatchPage = location.pathname.startsWith('/watch/');
+  const isAuthPage = AUTH_ROUTES.includes(location.pathname);
 
   useEffect(() => {
     localStorage.setItem(SIDEBAR_KEY, String(sidebarOpen));
@@ -52,58 +58,68 @@ function AppLayout() {
 
   return (
     <div className="app-layout">
-      {/* Navbar */}
-      <Navbar
-        onMenuClick={() => setSidebarOpen(prev => !prev)}
-        sidebarOpen={sidebarOpen}
-      />
-
-      {/* Sidebar */}
-      <Sidebar open={sidebarOpen} />
-
-      {/* Mobile overlay */}
-      {sidebarOpen && window.innerWidth < 768 && (
-        <div
-          className="sidebar-overlay"
-          onClick={handleOverlayClick}
-          style={{
-            position: 'fixed', inset: 0,
-            background: 'rgba(0,0,0,0.6)',
-            zIndex: 390,
-          }}
-        />
-      )}
-
-      {/* Main content */}
-      <main
-        className={`main-content ${sidebarOpen ? '' : 'sidebar-collapsed'}`}
-        id="main-content"
-      >
+      {/* Auth pages get clean full-screen layout */}
+      {isAuthPage ? (
         <Routes>
-          <Route path="/" element={<HomePage />} />
-          <Route path="/watch/:id" element={<WatchPage />} />
-          <Route path="/upload" element={<UploadPage />} />
-          <Route path="/profile" element={<ProfilePage />} />
-          <Route path="/admin" element={<AdminPage />} />
-          <Route path="/explore" element={<ExplorePage />} />
-          <Route path="/history" element={<HistoryPage />} />
-          <Route path="/notifications" element={<NotificationsPage />} />
-          <Route path="/dashboard" element={<DashboardPage />} />
-          <Route path="/playlists" element={<PlaylistsPage />} />
-          <Route path="/saved" element={<WatchLaterPage />} />
-          <Route path="/liked" element={<LikedVideosPage />} />
-          <Route path="/trending" element={<TrendingPage />} />
-          <Route path="/analytics" element={<AnalyticsPage />} />
-          <Route path="/subscriptions" element={<SubscriptionsPage />} />
-          <Route path="/settings" element={<SettingsPage />} />
-          <Route path="/help" element={<HelpPage />} />
-          <Route path="/search" element={<ExplorePage />} />
-          <Route path="*" element={<HomePage />} />
+          <Route path="/login" element={<LoginPage />} />
+          <Route path="/register" element={<RegisterPage />} />
         </Routes>
-      </main>
+      ) : (
+        <>
+          {/* Navbar */}
+          <Navbar
+            onMenuClick={() => setSidebarOpen(prev => !prev)}
+            sidebarOpen={sidebarOpen}
+          />
 
-      {/* Mobile Bottom Nav */}
-      <MobileNav />
+          {/* Sidebar */}
+          <Sidebar open={sidebarOpen} />
+
+          {/* Mobile overlay */}
+          {sidebarOpen && window.innerWidth < 768 && (
+            <div
+              className="sidebar-overlay"
+              onClick={handleOverlayClick}
+              style={{
+                position: 'fixed', inset: 0,
+                background: 'rgba(0,0,0,0.6)',
+                zIndex: 390,
+              }}
+            />
+          )}
+
+          {/* Main content */}
+          <main
+            className={`main-content ${sidebarOpen ? '' : 'sidebar-collapsed'}`}
+            id="main-content"
+          >
+            <Routes>
+              <Route path="/" element={<HomePage />} />
+              <Route path="/watch/:id" element={<WatchPage />} />
+              <Route path="/upload" element={<UploadPage />} />
+              <Route path="/profile" element={<ProfilePage />} />
+              <Route path="/admin" element={<AdminPage />} />
+              <Route path="/explore" element={<ExplorePage />} />
+              <Route path="/history" element={<HistoryPage />} />
+              <Route path="/notifications" element={<NotificationsPage />} />
+              <Route path="/dashboard" element={<DashboardPage />} />
+              <Route path="/playlists" element={<PlaylistsPage />} />
+              <Route path="/saved" element={<WatchLaterPage />} />
+              <Route path="/liked" element={<LikedVideosPage />} />
+              <Route path="/trending" element={<TrendingPage />} />
+              <Route path="/analytics" element={<AnalyticsPage />} />
+              <Route path="/subscriptions" element={<SubscriptionsPage />} />
+              <Route path="/settings" element={<SettingsPage />} />
+              <Route path="/help" element={<HelpPage />} />
+              <Route path="/search" element={<ExplorePage />} />
+              <Route path="*" element={<HomePage />} />
+            </Routes>
+          </main>
+
+          {/* Mobile Bottom Nav */}
+          <MobileNav />
+        </>
+      )}
     </div>
   );
 }

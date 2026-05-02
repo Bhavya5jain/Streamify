@@ -218,6 +218,20 @@ img {
   color: var(--text-primary);
 }
 
+.btn-signin {
+  background: transparent;
+  color: #a855f7;
+  border: 1px solid rgba(168, 85, 247, 0.4);
+  font-weight: 600;
+}
+
+.btn-signin:hover {
+  background: rgba(168, 85, 247, 0.12);
+  border-color: #a855f7;
+  color: #ec4899;
+  transform: translateY(-1px);
+}
+
 .btn-icon {
   display: inline-flex;
   align-items: center;
