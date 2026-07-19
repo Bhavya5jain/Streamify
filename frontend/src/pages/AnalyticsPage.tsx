@@ -4,8 +4,12 @@ import {
   AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
   BarChart, Bar
 } from 'recharts';
-import { mockRevenueData, mockUserGrowthData } from '../data/mockData';
 import './AnalyticsPage.css';
+
+// TODO: Replace with real analytics API data from services/api.ts
+const revenueData: any[] = [];
+const userGrowthData: any[] = [];
+
 
 const stats = [
   { label: 'Views', value: '45.2K', change: '+12%', icon: <Eye size={20} />, color: '#06b6d4' },
@@ -57,7 +61,7 @@ const AnalyticsPage: React.FC = () => {
         <div className="analytics-chart-card">
           <h2 className="chart-title">Views Performance</h2>
           <ResponsiveContainer width="100%" height={300}>
-            <AreaChart data={mockRevenueData}>
+            <AreaChart data={revenueData}>
               <defs>
                 <linearGradient id="colorViews" x1="0" y1="0" x2="0" y2="1">
                   <stop offset="5%" stopColor="#06b6d4" stopOpacity={0.3} />
@@ -78,7 +82,7 @@ const AnalyticsPage: React.FC = () => {
         <div className="analytics-chart-card">
           <h2 className="chart-title">Subscriber Growth</h2>
           <ResponsiveContainer width="100%" height={300}>
-            <BarChart data={mockUserGrowthData}>
+            <BarChart data={userGrowthData}>
               <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" />
               <XAxis dataKey="month" stroke="#888" tick={{fontSize: 12}} />
               <YAxis stroke="#888" tick={{fontSize: 12}} />

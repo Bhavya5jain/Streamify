@@ -1,13 +1,16 @@
 import React, { useState } from 'react';
 import { Users, Bell, Search, CheckCircle2 } from 'lucide-react';
 import { Link } from 'react-router-dom';
-import { mockCreators } from '../data/mockData';
 import './SubscriptionsPage.css';
+
+// TODO: Replace with getSubscribedChannels() from services/api.ts
+const allCreators: any[] = [];
+
 
 const SubscriptionsPage: React.FC = () => {
   const [search, setSearch] = useState('');
 
-  const filteredCreators = mockCreators.filter(creator => 
+  const filteredCreators = allCreators.filter(creator => 
     creator.name.toLowerCase().includes(search.toLowerCase()) || 
     creator.category.toLowerCase().includes(search.toLowerCase())
   );

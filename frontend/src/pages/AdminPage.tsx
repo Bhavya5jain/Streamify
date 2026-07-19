@@ -8,10 +8,14 @@ import {
   AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip,
   ResponsiveContainer, BarChart, Bar, Legend
 } from 'recharts';
-import {
-  mockRevenueData, mockUserGrowthData, mockFlaggedContent, mockCreators
-} from '../data/mockData';
 import './AdminPage.css';
+
+// TODO: Replace with real admin analytics API from services/api.ts
+const revenueData: any[] = [];
+const userGrowthData: any[] = [];
+const flaggedContent: any[] = [];
+const topCreators: any[] = [];
+
 
 const adminStats = [
   {
@@ -108,7 +112,7 @@ const AdminPage: React.FC = () => {
   const [flagFilter, setFlagFilter] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
 
-  const filteredFlagged = mockFlaggedContent.filter(item => {
+  const filteredFlagged = flaggedContent.filter(item => {
     const matchesSeverity = flagFilter === 'all' || item.severity === flagFilter;
     const matchesSearch = item.title.toLowerCase().includes(searchQuery.toLowerCase())
       || item.channel.toLowerCase().includes(searchQuery.toLowerCase());
@@ -166,7 +170,7 @@ const AdminPage: React.FC = () => {
           </div>
           <div className="chart-wrap">
             <ResponsiveContainer width="100%" height={240}>
-              <AreaChart data={mockRevenueData} margin={{ top: 4, right: 8, left: 0, bottom: 0 }}>
+              <AreaChart data={revenueData} margin={{ top: 4, right: 8, left: 0, bottom: 0 }}>
                 <defs>
                   <linearGradient id="revenueGrad" x1="0" y1="0" x2="0" y2="1">
                     <stop offset="5%" stopColor="#ff0040" stopOpacity={0.3} />
@@ -199,7 +203,7 @@ const AdminPage: React.FC = () => {
           </div>
           <div className="chart-wrap">
             <ResponsiveContainer width="100%" height={240}>
-              <BarChart data={mockUserGrowthData} margin={{ top: 4, right: 8, left: 0, bottom: 0 }}>
+              <BarChart data={userGrowthData} margin={{ top: 4, right: 8, left: 0, bottom: 0 }}>
                 <defs>
                   <linearGradient id="barGrad" x1="0" y1="0" x2="0" y2="1">
                     <stop offset="0%" stopColor="#7c3aed" />
@@ -223,7 +227,7 @@ const AdminPage: React.FC = () => {
         <section className="admin-card" aria-labelledby="top-creators-title">
           <h2 className="admin-card-title" id="top-creators-title">Top Creators</h2>
           <div className="top-creators-list">
-            {mockCreators.map((creator, i) => (
+            {topCreators.map((creator, i) => (
               <div key={creator.id} className="top-creator-row" id={`top-creator-${creator.id}`}>
                 <span className="top-rank">#{i + 1}</span>
                 <img src={creator.avatar} alt={creator.name} className="avatar avatar-sm" />

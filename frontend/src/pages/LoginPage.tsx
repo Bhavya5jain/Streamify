@@ -1,9 +1,16 @@
 import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
 import './LoginPage.css';
 
 const LoginPage: React.FC = () => {
   const navigate = useNavigate();
+  const location = useLocation();
+  const { login } = useAuth();
+
+  // Redirect back to the page they were trying to visit, or home
+  const from = (location.state as any)?.from || '/';
+
   const [form, setForm] = useState({ email: '', password: '' });
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -21,11 +28,21 @@ const LoginPage: React.FC = () => {
       return;
     }
     setLoading(true);
-    // TODO: call POST /api/users/login here during integration
-    setTimeout(() => {
+    setError('');
+    try {
+      // Detect if input is an email or a username and send the right field
+      const isEmail = form.email.includes('@');
+      const payload = isEmail
+        ? { email: form.email, password: form.password }
+        : { username: form.email, password: form.password };
+
+      await login(payload.email ?? '', payload.password, payload.username);
+      navigate(from, { replace: true });
+    } catch (err: any) {
+      setError(err.message || 'Something went wrong. Please try again.');
+    } finally {
       setLoading(false);
-      navigate('/');
-    }, 1000);
+    }
   };
 
   return (

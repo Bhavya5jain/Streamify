@@ -1,9 +1,10 @@
 import React, { useState, useRef } from 'react';
 import {
   Upload, Image, X, Plus, ChevronDown,
-  Globe, Lock, Users, Eye, Check, AlertCircle, Film
+  Globe, Lock, Users, Eye, Check, AlertCircle, Film, CheckCircle2
 } from 'lucide-react';
 import './UploadPage.css';
+
 
 const categories = ['Tech', 'Music', 'Gaming', 'Travel', 'Food', 'Design', 'Sports', 'Science', 'Comedy', 'Education'];
 const visibilityOptions = [
@@ -15,12 +16,15 @@ const visibilityOptions = [
 const UploadPage: React.FC = () => {
   const [dragging, setDragging] = useState(false);
   const [videoFile, setVideoFile] = useState<File | null>(null);
+  const [thumbnailFile, setThumbnailFile] = useState<File | null>(null);
   const [thumbnailPreview, setThumbnailPreview] = useState<string | null>(null);
   const [uploadProgress, setUploadProgress] = useState(0);
   const [uploading, setUploading] = useState(false);
   const [uploaded, setUploaded] = useState(false);
+  const [submitError, setSubmitError] = useState('');
+  const [submitSuccess, setSubmitSuccess] = useState(false);
   const [visibility, setVisibility] = useState('public');
-  const [tags, setTags] = useState<string[]>(['react', 'tutorial', 'webdev']);
+  const [tags, setTags] = useState<string[]>([]);
   const [tagInput, setTagInput] = useState('');
   const [form, setForm] = useState({
     title: '',
@@ -37,7 +41,9 @@ const UploadPage: React.FC = () => {
     const file = e.dataTransfer.files[0];
     if (file?.type.startsWith('video/')) {
       setVideoFile(file);
-      simulateUpload();
+      setUploadProgress(0);
+      setUploaded(false);
+      setUploading(false);
     }
   };
 
@@ -45,33 +51,22 @@ const UploadPage: React.FC = () => {
     const file = e.target.files?.[0];
     if (file) {
       setVideoFile(file);
-      simulateUpload();
+      // Reset progress state so the bar is fresh for the real upload
+      setUploadProgress(0);
+      setUploaded(false);
+      setUploading(false);
     }
   };
 
   const handleThumbnailSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
+      setThumbnailFile(file);
       const url = URL.createObjectURL(file);
       setThumbnailPreview(url);
     }
   };
 
-  const simulateUpload = () => {
-    setUploading(true);
-    setUploadProgress(0);
-    const interval = setInterval(() => {
-      setUploadProgress(prev => {
-        if (prev >= 100) {
-          clearInterval(interval);
-          setUploading(false);
-          setUploaded(true);
-          return 100;
-        }
-        return prev + Math.random() * 15;
-      });
-    }, 200);
-  };
 
   const addTag = () => {
     const t = tagInput.trim().toLowerCase().replace(/\s+/g, '');
@@ -85,7 +80,72 @@ const UploadPage: React.FC = () => {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    console.log('Publishing:', { ...form, tags, visibility, videoFile });
+    setSubmitError('');
+
+    if (!videoFile) {
+      setSubmitError('Please select a video file first.');
+      return;
+    }
+    if (!form.title.trim()) {
+      setSubmitError('Please enter a title.');
+      return;
+    }
+
+    const formData = new FormData();
+    formData.append('videoFile', videoFile);
+    formData.append('title', form.title.trim());
+    formData.append('discription', form.description.trim());
+    formData.append('category', form.category);
+    if (thumbnailFile) formData.append('thumbnail', thumbnailFile);
+
+    setUploading(true);
+    setUploaded(false);
+    setUploadProgress(0);
+
+    // Use XHR for real upload progress tracking
+    const xhr = new XMLHttpRequest();
+
+    // Track upload progress (browser → server)
+    xhr.upload.addEventListener('progress', (event) => {
+      if (event.lengthComputable) {
+        const pct = Math.round((event.loaded / event.total) * 100);
+        // Cap at 90% — the remaining 10% is Cloudinary processing on server
+        setUploadProgress(Math.min(pct, 90));
+      }
+    });
+
+    xhr.addEventListener('load', () => {
+      let data: any = {};
+      try { data = JSON.parse(xhr.responseText); } catch (_) {}
+
+      if (xhr.status >= 200 && xhr.status < 300) {
+        setUploadProgress(100);
+        setUploading(false);
+        setUploaded(true);
+        setSubmitSuccess(true);
+      } else {
+        setUploading(false);
+        setSubmitError(data?.message || `Upload failed (${xhr.status}). Please try again.`);
+      }
+    });
+
+    xhr.addEventListener('error', () => {
+      setUploading(false);
+      setSubmitError('Network error — make sure the backend server is running on port 8000.');
+    });
+
+    xhr.addEventListener('timeout', () => {
+      setUploading(false);
+      setSubmitError('Upload timed out. Your video may be too large or the connection is slow. Try a smaller file.');
+    });
+
+    // 10 minute timeout (large videos can take a while on Cloudinary free tier)
+    xhr.timeout = 10 * 60 * 1000;
+
+    const BASE_URL = (import.meta as any).env?.VITE_API_URL ?? 'http://localhost:8000';
+    xhr.open('POST', `${BASE_URL}/videos`);
+    xhr.withCredentials = true;
+    xhr.send(formData);
   };
 
   return (
@@ -163,6 +223,8 @@ const UploadPage: React.FC = () => {
                 <div className="upload-progress-label">
                   {uploaded ? (
                     <span className="upload-done">✓ Upload complete</span>
+                  ) : uploadProgress >= 90 ? (
+                    <span>Processing on Cloudinary... please wait</span>
                   ) : (
                     <span>{Math.round(Math.min(uploadProgress, 100))}% uploaded...</span>
                   )}
@@ -311,10 +373,48 @@ const UploadPage: React.FC = () => {
               </div>
             </div>
 
+            {/* Error message */}
+            {submitError && (
+              <div style={{
+                background: 'rgba(239,68,68,0.1)',
+                border: '1px solid rgba(239,68,68,0.3)',
+                borderRadius: '10px',
+                padding: '12px 16px',
+                color: '#f87171',
+                fontSize: '14px',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px',
+                marginTop: '4px',
+              }}>
+                <AlertCircle size={16} />
+                {submitError}
+              </div>
+            )}
+
+            {/* Success message */}
+            {submitSuccess && (
+              <div style={{
+                background: 'rgba(34,197,94,0.1)',
+                border: '1px solid rgba(34,197,94,0.3)',
+                borderRadius: '10px',
+                padding: '12px 16px',
+                color: '#4ade80',
+                fontSize: '14px',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px',
+                marginTop: '4px',
+              }}>
+                <CheckCircle2 size={16} />
+                Video published successfully! It may take a moment to appear.
+              </div>
+            )}
+
             {/* Info card */}
             <div className="upload-info-card">
               <AlertCircle size={16} />
-              <p>Your video will be reviewed by our team. Most videos go live within 24 hours of upload.</p>
+              <p>Your video will be uploaded to Cloudinary and saved. Make sure you are logged in.</p>
             </div>
 
             {/* Action Buttons */}
@@ -326,10 +426,16 @@ const UploadPage: React.FC = () => {
                 type="submit"
                 className="btn btn-primary"
                 style={{ flex: 2 }}
-                disabled={!uploaded && !videoFile}
+                disabled={uploading || !videoFile || submitSuccess}
                 id="publish-btn"
               >
-                <Eye size={16} /> Publish Video
+                {uploading ? (
+                  <><span style={{ width: 16, height: 16, border: '2px solid rgba(255,255,255,0.3)', borderTopColor: 'white', borderRadius: '50%', display: 'inline-block', animation: 'spin 0.7s linear infinite' }} /> Uploading...</>
+                ) : submitSuccess ? (
+                  <><CheckCircle2 size={16} /> Published!</>
+                ) : (
+                  <><Eye size={16} /> Publish Video</>
+                )}
               </button>
             </div>
           </div>
@@ -340,3 +446,4 @@ const UploadPage: React.FC = () => {
 };
 
 export default UploadPage;
+

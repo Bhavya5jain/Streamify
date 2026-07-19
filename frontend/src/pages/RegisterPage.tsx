@@ -58,12 +58,37 @@ const RegisterPage: React.FC = () => {
       return;
     }
     setLoading(true);
-    // TODO: call POST /api/users/register (multipart/form-data) during integration
-    setTimeout(() => {
-      setLoading(false);
+    setError('');
+
+    try {
+      const formData = new FormData();
+      formData.append('fullName', form.fullName);
+      formData.append('username', form.username.toLowerCase());
+      formData.append('email', form.email);
+      formData.append('password', form.password);
+      formData.append('avatar', avatarRef.current.files[0]);
+      if (coverRef.current?.files?.[0]) {
+        formData.append('coverImage', coverRef.current.files[0]);
+      }
+
+      const res = await fetch('http://localhost:8000/users/register', {
+        method: 'POST',
+        body: formData,
+        credentials: 'include',
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data?.message || 'Registration failed');
+      }
+      // Registration successful — redirect to login
       navigate('/login');
-    }, 1200);
+    } catch (err: any) {
+      setError(err.message || 'Something went wrong. Please try again.');
+    } finally {
+      setLoading(false);
+    }
   };
+
 
   return (
     <div className="auth-page">

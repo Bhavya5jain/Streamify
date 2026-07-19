@@ -1,14 +1,11 @@
 import React, { useState } from 'react';
 import { Clock, Trash2, Play, Shuffle, X, CheckSquare } from 'lucide-react';
 import VideoCard from '../components/VideoCard';
-import { mockVideos } from '../data/mockData';
 import './WatchLaterPage.css';
 
-// Simulate watch later list with added time info
-const initialWatchLater = mockVideos.map((v, i) => ({
-  ...v,
-  addedAt: ['2 hours ago', 'Yesterday', '3 days ago', '1 week ago', '2 weeks ago'][i % 5],
-}));
+// TODO: Replace with saved playlist API from services/api.ts
+const initialWatchLater: any[] = [];
+
 
 const WatchLaterPage: React.FC = () => {
   const [videos, setVideos] = useState(initialWatchLater);

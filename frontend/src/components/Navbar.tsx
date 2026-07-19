@@ -5,7 +5,7 @@ import {
   Settings, LogOut, User, LayoutDashboard, Bookmark,
   CheckCircle2, LogIn
 } from 'lucide-react';
-import { mockNotifications, currentUser } from '../data/mockData';
+import { useAuth } from '../context/AuthContext';
 import './Navbar.css';
 
 interface NavbarProps {
@@ -14,17 +14,13 @@ interface NavbarProps {
 }
 
 const Navbar: React.FC<NavbarProps> = ({ onMenuClick, sidebarOpen }) => {
+  const { user, isLoggedIn, logout } = useAuth();
   const [searchQuery, setSearchQuery] = useState('');
   const [showNotifications, setShowNotifications] = useState(false);
   const [showUserMenu, setShowUserMenu] = useState(false);
-  const [showUploadModal, setShowUploadModal] = useState(false);
-  // TODO: replace with real auth context during integration
-  const [isLoggedIn] = useState(true);
   const navigate = useNavigate();
   const notifRef = useRef<HTMLDivElement>(null);
   const userRef = useRef<HTMLDivElement>(null);
-
-  const unreadCount = mockNotifications.filter(n => !n.read).length;
 
   useEffect(() => {
     const handleClick = (e: MouseEvent) => {
@@ -44,6 +40,12 @@ const Navbar: React.FC<NavbarProps> = ({ onMenuClick, sidebarOpen }) => {
     if (searchQuery.trim()) {
       navigate(`/search?q=${encodeURIComponent(searchQuery)}`);
     }
+  };
+
+  const handleLogout = async () => {
+    setShowUserMenu(false);
+    await logout();
+    navigate('/login');
   };
 
   return (
@@ -113,31 +115,17 @@ const Navbar: React.FC<NavbarProps> = ({ onMenuClick, sidebarOpen }) => {
               id="notifications-btn"
             >
               <Bell size={20} />
-              {unreadCount > 0 && (
-                <span className="notif-badge">{unreadCount}</span>
-              )}
             </button>
 
             {showNotifications && (
               <div className="dropdown notif-dropdown" id="notifications-dropdown">
                 <div className="dropdown-header">
                   <span className="dropdown-title">Notifications</span>
-                  <button className="mark-read-btn">Mark all read</button>
                 </div>
                 <div className="notif-list">
-                  {mockNotifications.map(notif => (
-                    <div key={notif.id} className={`notif-item ${!notif.read ? 'unread' : ''}`}>
-                      <img src={notif.avatar} alt={notif.user} className="avatar avatar-sm" />
-                      <div className="notif-content">
-                        <p className="notif-text">
-                          <strong>{notif.user}</strong> {notif.message}
-                          {notif.title && <em> "{notif.title}"</em>}
-                        </p>
-                        <span className="notif-time">{notif.time}</span>
-                      </div>
-                      {!notif.read && <span className="notif-dot-sm"></span>}
-                    </div>
-                  ))}
+                  <p style={{ padding: '16px', color: 'var(--text-muted)', fontSize: '14px', textAlign: 'center' }}>
+                    No notifications yet
+                  </p>
                 </div>
                 <div className="dropdown-footer">
                   <Link to="/notifications" className="view-all-btn">View all notifications</Link>
@@ -155,37 +143,45 @@ const Navbar: React.FC<NavbarProps> = ({ onMenuClick, sidebarOpen }) => {
                 id="user-avatar-btn"
                 aria-label="User menu"
               >
-                <img src={currentUser.avatar} alt={currentUser.name} className="avatar avatar-sm" />
+                <img
+                  src={user?.avtar || `https://api.dicebear.com/7.x/avataaars/svg?seed=${user?.username}`}
+                  alt={user?.fullName}
+                  className="avatar avatar-sm"
+                />
                 <ChevronDown size={14} className={`chevron ${showUserMenu ? 'open' : ''}`} />
               </button>
 
               {showUserMenu && (
                 <div className="dropdown user-dropdown" id="user-menu-dropdown">
                   <div className="user-menu-header">
-                    <img src={currentUser.avatar} alt={currentUser.name} className="avatar avatar-md" />
+                    <img
+                      src={user?.avtar || `https://api.dicebear.com/7.x/avataaars/svg?seed=${user?.username}`}
+                      alt={user?.fullName}
+                      className="avatar avatar-md"
+                    />
                     <div>
-                      <div className="user-menu-name">{currentUser.name}</div>
-                      <div className="user-menu-handle">{currentUser.handle}</div>
+                      <div className="user-menu-name">{user?.fullName}</div>
+                      <div className="user-menu-handle">@{user?.username}</div>
                     </div>
                   </div>
                   <hr className="divider" />
-                  <Link to="/profile" className="dropdown-item" id="profile-menu-item">
+                  <Link to="/profile" className="dropdown-item" id="profile-menu-item" onClick={() => setShowUserMenu(false)}>
                     <User size={16} /> Your Channel
                   </Link>
-                  <Link to="/dashboard" className="dropdown-item" id="dashboard-menu-item">
+                  <Link to="/dashboard" className="dropdown-item" id="dashboard-menu-item" onClick={() => setShowUserMenu(false)}>
                     <LayoutDashboard size={16} /> Creator Studio
                   </Link>
-                  <Link to="/saved" className="dropdown-item" id="saved-menu-item">
+                  <Link to="/saved" className="dropdown-item" id="saved-menu-item" onClick={() => setShowUserMenu(false)}>
                     <Bookmark size={16} /> Saved Playlists
                   </Link>
-                  <Link to="/admin" className="dropdown-item" id="admin-menu-item">
+                  <Link to="/admin" className="dropdown-item" id="admin-menu-item" onClick={() => setShowUserMenu(false)}>
                     <CheckCircle2 size={16} /> Admin Panel
                   </Link>
                   <hr className="divider" />
-                  <Link to="/settings" className="dropdown-item" id="settings-menu-item">
+                  <Link to="/settings" className="dropdown-item" id="settings-menu-item" onClick={() => setShowUserMenu(false)}>
                     <Settings size={16} /> Settings
                   </Link>
-                  <button className="dropdown-item danger" id="logout-menu-item">
+                  <button className="dropdown-item danger" id="logout-menu-item" onClick={handleLogout}>
                     <LogOut size={16} /> Sign Out
                   </button>
                 </div>

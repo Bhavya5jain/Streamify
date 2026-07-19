@@ -1,9 +1,12 @@
 import React, { useState } from 'react';
-import { Flame, TrendingUp, Music2, Gamepad2, Film } from 'lucide-react';
+import { Flame, TrendingUp, Music2, Gamepad2, Film, VideoOff } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import VideoCard from '../components/VideoCard';
-import { mockVideos } from '../data/mockData';
 import './TrendingPage.css';
+
+// TODO: Replace with getVideos({ sortBy: 'views', sortType: 'desc' }) from services/api.ts
+const allVideos: any[] = [];
+
 
 // Simulate trending categories
 const trendingCategories = [
@@ -16,17 +19,25 @@ const trendingCategories = [
 const TrendingPage: React.FC = () => {
   const [activeTab, setActiveTab] = useState('now');
 
-  // Sort mock videos by views for the trending effect
-  // In a real app, backend would return the trending list
-  const trendingVideos = [...mockVideos].sort((a, b) => {
-    // Basic string parse for mock views like "2.4M", "890K"
-    const parseViews = (v: string) => {
-      if (v.includes('M')) return parseFloat(v) * 1000000;
-      if (v.includes('K')) return parseFloat(v) * 1000;
-      return parseFloat(v);
-    };
-    return parseViews(b.views) - parseViews(a.views);
+  const trendingVideos = [...allVideos].sort((a, b) => {
+    return (b.views ?? 0) - (a.views ?? 0);
   });
+
+  if (trendingVideos.length === 0) {
+    return (
+      <div className="trending-page page-container">
+        <div className="trending-header">
+          <div className="trending-icon-wrap"><Flame size={32} fill="currentColor" /></div>
+          <div><h1 className="trending-title">Trending</h1><p className="trending-subtitle">What's popular right now</p></div>
+        </div>
+        <div style={{ textAlign: 'center', padding: '80px 20px', color: 'var(--text-muted)' }}>
+          <VideoOff size={48} style={{ marginBottom: '16px' }} />
+          <h3 style={{ fontSize: '18px', marginBottom: '8px', color: 'var(--text-secondary)' }}>No trending videos yet</h3>
+          <p>Upload videos to see them trending here!</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="trending-page page-container">

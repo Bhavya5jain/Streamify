@@ -1,17 +1,11 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { ListVideo, Plus, Play, MoreVertical, Pencil, Trash2, Lock, Globe, X } from 'lucide-react';
-import { mockPlaylists, mockVideos } from '../data/mockData';
 import './PlaylistsPage.css';
 
-// Simulate more playlists
-const allPlaylists = [
-  ...mockPlaylists,
-  { id: '5', name: 'Rust Programming Deep Dive', videos: 8,  thumbnail: 'https://picsum.photos/seed/pl5/320/180', updatedAt: '5 days ago', privacy: 'private' },
-  { id: '6', name: 'Night Lo-Fi Sessions 🎵',   videos: 31, thumbnail: 'https://picsum.photos/seed/pl6/320/180', updatedAt: '1 week ago',  privacy: 'public' },
-  { id: '7', name: 'UI/UX Inspiration',          videos: 19, thumbnail: 'https://picsum.photos/seed/pl7/320/180', updatedAt: '3 days ago',  privacy: 'public' },
-  { id: '8', name: 'Cooking Masterclass',         videos: 12, thumbnail: 'https://picsum.photos/seed/pl8/320/180', updatedAt: '2 weeks ago', privacy: 'unlisted' },
-].map(p => ({ ...p, privacy: (p as any).privacy || 'public' }));
+// TODO: Replace with getUserPlaylists() from services/api.ts
+const allPlaylists: any[] = [];
+
 
 interface CreateModalProps {
   onClose: () => void;

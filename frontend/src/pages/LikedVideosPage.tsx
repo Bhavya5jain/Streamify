@@ -2,14 +2,11 @@ import React, { useState } from 'react';
 import { ThumbsUp, Play, Shuffle, Grid3X3, List, Heart } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import VideoCard from '../components/VideoCard';
-import { mockVideos } from '../data/mockData';
 import './LikedVideosPage.css';
 
-// Simulate liked videos — every video with a liked timestamp
-const likedVideos = mockVideos.map((v, i) => ({
-  ...v,
-  likedAt: ['Just now', '2 hours ago', 'Yesterday', '3 days ago', '1 week ago', '2 weeks ago', '1 month ago', '2 months ago'][i % 8],
-}));
+// TODO: Replace with getLikedVideos() from services/api.ts
+const likedVideos: any[] = [];
+
 
 type ViewMode = 'grid' | 'list';
 type SortBy = 'recent' | 'oldest' | 'popular';

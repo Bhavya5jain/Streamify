@@ -7,7 +7,8 @@ import {
   Clock, ListVideo, Film, Utensils, Palette, Dumbbell,
   Newspaper, Laugh, FlaskConical, DollarSign
 } from 'lucide-react';
-import { currentUser } from '../data/mockData';
+// TODO: Replace with real auth context
+const currentUser = { avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=guest' };
 import './Sidebar.css';
 
 interface SidebarProps {

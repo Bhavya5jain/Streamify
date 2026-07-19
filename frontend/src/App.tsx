@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, useLocation, Navigate } from 'react-router-dom';
+import { AuthProvider } from './context/AuthContext';
+import ProtectedRoute from './components/ProtectedRoute';
 import Navbar from './components/Navbar';
 import Sidebar from './components/Sidebar';
 import MobileNav from './components/MobileNav';
@@ -25,8 +27,15 @@ import RegisterPage from './pages/RegisterPage';
 
 const SIDEBAR_KEY = 'streamify_sidebar';
 
-// Auth pages — no Navbar/Sidebar on these
+// Routes that don't require login and have no nav/sidebar
 const AUTH_ROUTES = ['/login', '/register'];
+
+// Routes that require the user to be logged in
+const PROTECTED_PATHS = [
+  '/upload', '/dashboard', '/analytics', '/admin',
+  '/history', '/playlists', '/saved', '/liked',
+  '/subscriptions', '/profile', '/notifications', '/settings',
+];
 
 function AppLayout() {
   const [sidebarOpen, setSidebarOpen] = useState(() => {
@@ -35,30 +44,26 @@ function AppLayout() {
   });
 
   const location = useLocation();
-  const isWatchPage = location.pathname.startsWith('/watch/');
   const isAuthPage = AUTH_ROUTES.includes(location.pathname);
 
   useEffect(() => {
     localStorage.setItem(SIDEBAR_KEY, String(sidebarOpen));
   }, [sidebarOpen]);
 
-  // Close sidebar on mobile when navigating
   useEffect(() => {
-    if (window.innerWidth < 768) {
-      setSidebarOpen(false);
-    }
+    if (window.innerWidth < 768) setSidebarOpen(false);
   }, [location.pathname]);
 
-  // Mobile overlay click to close
   const handleOverlayClick = () => {
-    if (window.innerWidth < 768) {
-      setSidebarOpen(false);
-    }
+    if (window.innerWidth < 768) setSidebarOpen(false);
   };
+
+  const protect = (element: React.ReactNode) => (
+    <ProtectedRoute>{element}</ProtectedRoute>
+  );
 
   return (
     <div className="app-layout">
-      {/* Auth pages get clean full-screen layout */}
       {isAuthPage ? (
         <Routes>
           <Route path="/login" element={<LoginPage />} />
@@ -66,16 +71,13 @@ function AppLayout() {
         </Routes>
       ) : (
         <>
-          {/* Navbar */}
           <Navbar
             onMenuClick={() => setSidebarOpen(prev => !prev)}
             sidebarOpen={sidebarOpen}
           />
 
-          {/* Sidebar */}
           <Sidebar open={sidebarOpen} />
 
-          {/* Mobile overlay */}
           {sidebarOpen && window.innerWidth < 768 && (
             <div
               className="sidebar-overlay"
@@ -88,35 +90,37 @@ function AppLayout() {
             />
           )}
 
-          {/* Main content */}
           <main
             className={`main-content ${sidebarOpen ? '' : 'sidebar-collapsed'}`}
             id="main-content"
           >
             <Routes>
+              {/* Public routes */}
               <Route path="/" element={<HomePage />} />
-              <Route path="/watch/:id" element={<WatchPage />} />
-              <Route path="/upload" element={<UploadPage />} />
-              <Route path="/profile" element={<ProfilePage />} />
-              <Route path="/admin" element={<AdminPage />} />
               <Route path="/explore" element={<ExplorePage />} />
-              <Route path="/history" element={<HistoryPage />} />
-              <Route path="/notifications" element={<NotificationsPage />} />
-              <Route path="/dashboard" element={<DashboardPage />} />
-              <Route path="/playlists" element={<PlaylistsPage />} />
-              <Route path="/saved" element={<WatchLaterPage />} />
-              <Route path="/liked" element={<LikedVideosPage />} />
-              <Route path="/trending" element={<TrendingPage />} />
-              <Route path="/analytics" element={<AnalyticsPage />} />
-              <Route path="/subscriptions" element={<SubscriptionsPage />} />
-              <Route path="/settings" element={<SettingsPage />} />
-              <Route path="/help" element={<HelpPage />} />
               <Route path="/search" element={<ExplorePage />} />
-              <Route path="*" element={<HomePage />} />
+              <Route path="/trending" element={<TrendingPage />} />
+              <Route path="/help" element={<HelpPage />} />
+              <Route path="/watch/:id" element={<WatchPage />} />
+
+              {/* Protected routes — redirect to /login if not authenticated */}
+              <Route path="/upload"        element={protect(<UploadPage />)} />
+              <Route path="/dashboard"     element={protect(<DashboardPage />)} />
+              <Route path="/analytics"     element={protect(<AnalyticsPage />)} />
+              <Route path="/admin"         element={protect(<AdminPage />)} />
+              <Route path="/history"       element={protect(<HistoryPage />)} />
+              <Route path="/playlists"     element={protect(<PlaylistsPage />)} />
+              <Route path="/saved"         element={protect(<WatchLaterPage />)} />
+              <Route path="/liked"         element={protect(<LikedVideosPage />)} />
+              <Route path="/subscriptions" element={protect(<SubscriptionsPage />)} />
+              <Route path="/profile"       element={protect(<ProfilePage />)} />
+              <Route path="/notifications" element={protect(<NotificationsPage />)} />
+              <Route path="/settings"      element={protect(<SettingsPage />)} />
+
+              <Route path="*" element={<Navigate to="/" replace />} />
             </Routes>
           </main>
 
-          {/* Mobile Bottom Nav */}
           <MobileNav />
         </>
       )}
@@ -127,7 +131,9 @@ function AppLayout() {
 function App() {
   return (
     <BrowserRouter>
-      <AppLayout />
+      <AuthProvider>
+        <AppLayout />
+      </AuthProvider>
     </BrowserRouter>
   );
 }
