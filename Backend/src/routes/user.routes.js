@@ -1,6 +1,6 @@
 import express from "express"
 const router = express.Router();
-import {registerUser,loginUser , LogOutUser , refreshAccessToken ,changeCurrentPassword ,updateAccountDetails ,updateUserAvatar ,updateUsercoverImage ,getUserChannelProfile ,getWatchHistory ,getCurrentUser } from "../controllers/user.controller.js"
+import {registerUser,loginUser , LogOutUser , refreshAccessToken ,changeCurrentPassword ,updateAccountDetails ,updateUserAvatar ,updateUsercoverImage ,getUserChannelProfile ,getWatchHistory ,getCurrentUser, clearWatchHistory } from "../controllers/user.controller.js"
 import {upload} from "../middlewares/multer.middleware.js"
 import {authMiddleware} from "../middlewares/Auth.middleware.js"
 import multer from "multer";
@@ -27,6 +27,7 @@ router.patch("/updateUsercoverImage",authMiddleware,upload.fields([{ name: "cove
 //router.get("/forgot-password",generateOTP,verifyOTP,changePassword)
 router.get("/getUserChannelProfile/c/:username",authMiddleware,getUserChannelProfile)
 router.get("/getWatchHistory",authMiddleware,getWatchHistory)
+router.delete("/clearWatchHistory",authMiddleware,clearWatchHistory)
 router.get("/getCurrentUser",authMiddleware,getCurrentUser)
 
 

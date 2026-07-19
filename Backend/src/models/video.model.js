@@ -22,6 +22,10 @@ const videoSchema = new mongoose.Schema({
         type:String,
         default:"Stringify Video"
     },
+    category:{
+        type:String,
+        default:"General"
+    },
     duration:{
         type:Number,
         required:true

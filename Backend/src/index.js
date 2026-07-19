@@ -8,6 +8,10 @@ connectDB().then(()=>{
         console.log(`Server is running on port ${process.env.PORT}`);
     })
 
+    // Allow up to 10 minutes for large video uploads
+    server.timeout = 10 * 60 * 1000;          // 10 min socket timeout
+    server.keepAliveTimeout = 10 * 60 * 1000; // 10 min keep-alive
+
     server.on("error",(error)=>{
         console.log("There is a problem in hosting server",error.message);
     })

@@ -1,24 +1,19 @@
 const asyncHandler = (RequestHandler) => {
-    return (req,res,next)=>{
+    return (req, res, next) => {
         Promise
-        .resolve(RequestHandler(req,res,next))
-        .catch((error)=>{console.log(error.message)})
-    }
-}
+            .resolve(RequestHandler(req, res, next))
+            .catch((error) => {
+                console.error("[asyncHandler error]", error?.message, error?.stack);
+                // If response already sent, pass to Express error handler
+                if (res.headersSent) return next(error);
+                const statusCode = error?.statusCode || 500;
+                res.status(statusCode).json({
+                    success: false,
+                    message: error?.message || "Internal Server Error",
+                    errors: error?.errors || [],
+                });
+            });
+    };
+};
 
-export {asyncHandler};
-
-// Samajhne ke liye
-
-// const asyncHandler = (fn) => async (req,res) => {
-//     try {
-//         await fn(req,res,next)
-//     } catch (error) {
-//         res.status(500).json({
-//             success:false,
-//             message:error.message
-//         })
-//     }
-// }
-
-// export {asyncHandler};
+export { asyncHandler };

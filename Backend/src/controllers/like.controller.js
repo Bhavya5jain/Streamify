@@ -145,4 +145,20 @@ const getTweetLikes = asyncHandler(async (req, res) => {
     );
 });
 
-export { toogleVideoLike, toogleCommentLike, toogleTweetLike, getVideoLikes, getCommentLikes, getTweetLikes };
+// ─────────────────────────────────────────────
+// GET /likes/my-videos  →  get all videos liked by the logged-in user
+// ─────────────────────────────────────────────
+const getLikedVideos = asyncHandler(async (req, res) => {
+    const likes = await Like.find({ likedBy: req.user._id, video: { $exists: true, $ne: null } })
+        .populate({
+            path: 'video',
+            populate: { path: 'owner', select: 'fullName username avtar' },
+        })
+        .sort({ createdAt: -1 });
+
+    const videos = likes.map(l => l.video).filter(Boolean);
+
+    return res.status(200).json(new apiResponse(200, "Liked videos fetched", videos));
+});
+
+export { toogleVideoLike, toogleCommentLike, toogleTweetLike, getVideoLikes, getCommentLikes, getTweetLikes, getLikedVideos };

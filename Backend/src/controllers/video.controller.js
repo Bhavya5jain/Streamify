@@ -17,11 +17,11 @@ const getAllVideos = asyncHandler(async (req, res) => {
         sortBy = "createdAt",
         sortType = "desc",
         userId,
+        category,
     } = req.query;
 
     const matchStage = { isPublished: true };
 
-    // Search by title or description
     if (query) {
         matchStage.$or = [
             { title: { $regex: query, $options: "i" } },
@@ -29,12 +29,16 @@ const getAllVideos = asyncHandler(async (req, res) => {
         ];
     }
 
-    // Filter by a specific channel/user
     if (userId) {
         if (!mongoose.Types.ObjectId.isValid(userId)) {
             throw new apiError(400, "Invalid userId");
         }
         matchStage.owner = new mongoose.Types.ObjectId(userId);
+    }
+
+    // Filter by category if provided and not "All"
+    if (category && category !== "All") {
+        matchStage.category = { $regex: `^${category}$`, $options: "i" };
     }
 
     const aggregatePipeline = Video.aggregate([
@@ -82,7 +86,7 @@ const getAllVideos = asyncHandler(async (req, res) => {
 // POST /videos  →  publish a new video
 // ─────────────────────────────────────────────
 const publishVideo = asyncHandler(async (req, res) => {
-    const { title, discription } = req.body;
+    const { title, discription, category } = req.body;
 
     if (!title?.trim()) {
         throw new apiError(400, "Title is required");
@@ -102,6 +106,14 @@ const publishVideo = asyncHandler(async (req, res) => {
     }
 
     // Upload thumbnail to cloudinary (optional)
+    // If no thumbnail provided, auto-generate one from the video at the 2-second mark
+    let autoThumbnailUrl = "";
+    if (videoUpload.public_id) {
+        // Cloudinary URL transformation: grab frame at 2s, convert to jpg, 1280x720
+        const cloudName = process.env.CLOUDINARY_CLOUD_NAME;
+        autoThumbnailUrl = `https://res.cloudinary.com/${cloudName}/video/upload/so_30p,w_1280,h_720,c_fill,f_jpg/${videoUpload.public_id}.jpg`;
+    }
+
     let thumbnailUpload = null;
     if (thumbnailLocalPath) {
         thumbnailUpload = await uploadOnCloudinary(thumbnailLocalPath);
@@ -109,10 +121,11 @@ const publishVideo = asyncHandler(async (req, res) => {
 
     const video = await Video.create({
         videoFile: videoUpload.url,
-        thumbnail: thumbnailUpload?.url || "",
+        thumbnail: thumbnailUpload?.url || autoThumbnailUrl,
         title: title.trim(),
         discription: discription?.trim() || "",
-        duration: videoUpload.duration || 0,   // cloudinary returns duration for videos
+        category: category?.trim() || "General",
+        duration: videoUpload.duration || 0,
         owner: req.user._id,
         isPublished: true,
     });

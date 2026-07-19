@@ -30,20 +30,10 @@ const generateRefreshAndAccessTocken = async function (userId) {
 }
 
 const registerUser = asyncHandler(async (req, res) => {
-    console.log("Register user controller executed");
-    console.log(req.body);
     const { fullName, username, email, password } = req.body;
-    //DB_NAME.User.insertOne()
-    // get user details{
-    // Username --> MONGO_DB
-    // email --> MONGO_DB
-    // fullName --> MONGO_DB
-    // avatar --> multer -->cloudinary
-    // coverImage --> multer --> cloudinary
-    // password --> encript(bcrypt) --> MONGO_DB
-    // refreshToken(JWT)}
-    if ([fullName, username, email, password].some(field => field.trim() === "")) {
-        throw new apiError(400, "field is empty");
+
+    if ([fullName, username, email, password].some(field => !field || field.trim() === "")) {
+        throw new apiError(400, "All fields are required");
     }
 
     const isUserPresent = await User.findOne({
@@ -53,75 +43,48 @@ const registerUser = asyncHandler(async (req, res) => {
     if (isUserPresent) {
         throw new apiError(400, "User already exists with the given username or email");
     }
-    /* check validations{
-        is any of field is empty
-        is the email format is correct
-        check if user already exists:username,email
 
+    if (!req.files?.avatar?.[0]?.path) {
+        throw new apiError(400, "Avatar is required");
     }
-    */
-    console.log("All validations passed");
-    console.log(req.files);
+
     const avtarLocalPath = req.files.avatar[0].path;
-    let coverImageLocalPath = "";
-    console.log("check3");
+    const coverImageLocalPath = req.files?.coverImage?.[0]?.path || "";
 
-    if (req.files && Array.isArray(req.files.coverImage) && req.files.coverImage.length > 0) {
-        coverImageLocalPath = req.files?.coverImage[0].path;
-    }
-    console.log("check4");
-
-
-    if (!avtarLocalPath) {
-        throw new apiError(400, "Avtar not found");
-    }
-
-    const avtarUrl = await uploadOnCloudinary(avtarLocalPath); //response as URL
-    const coverImageUrl = await uploadOnCloudinary(coverImageLocalPath); //response as URL
-
+    const avtarUrl = await uploadOnCloudinary(avtarLocalPath);
     if (!avtarUrl) {
-        throw new apiError(400, "Avtar not found");
+        throw new apiError(500, "Failed to upload avatar to Cloudinary");
     }
-    /*
- 
-     check for images,check for avtar
-     upload them to cloudanary through multer
-     take response from cloudanary as url of the file
-     store the url in mongoDB
-     check wheather the user is successfully registered
-     */
 
-    const data = {
-        username,
+    const coverImageUrl = coverImageLocalPath
+        ? await uploadOnCloudinary(coverImageLocalPath)
+        : null;
+
+    const CreatedUser = await User.create({
+        username: username.toLowerCase(),
         fullName,
         password,
         email,
         avtar: avtarUrl.url,
         coverImage: coverImageUrl?.url || ""
-    };
-    console.log("Data to be stored in DB", data);
-    const CreatedUser = await User.create(data);
-    console.log("Created user in DB", CreatedUser);
+    });
 
     const safeUser = await User.findById(CreatedUser._id).select("-password -refreshToken");
     if (!safeUser) {
         throw new apiError(500, "Failed to register user");
     }
-    return res.status(201).json(new apiResponse(201, "User is successfully registered", safeUser));
+
+    return res.status(201).json(new apiResponse(201, "User registered successfully", safeUser));
 })
 
 const loginUser = asyncHandler(async (req, res) => {
-    // email id
-    // password
-
     const { email, password, username } = req.body;
 
-    // validations
-    if (!email && !password) {
-        throw new apiError(400, "Email and password are required");
+    if ((!email && !username) || !password) {
+        throw new apiError(400, "Email/username and password are required");
     }
 
-    const user = await User.findOne({ $or: [{ email }, { username }] })
+    const user = await User.findOne({ $or: [{ email }, { username }] });
 
     if (!user) {
         throw new apiError(404, "User not found with the given email or username");
@@ -138,7 +101,8 @@ const loginUser = asyncHandler(async (req, res) => {
     const loggedInUser = await User.findById(user._id).select("-password -refreshToken");
     const option = {
         httpOnly: true,
-        secure: true
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
     };
 
     res
@@ -148,10 +112,10 @@ const loginUser = asyncHandler(async (req, res) => {
         .json(
             new apiResponse(
                 200,
+                "logged in user successfully",
                 {
                     user: loggedInUser, accessToken, refreshToken
-                },
-                "logged in user succefully"
+                }
             )
         )
 
@@ -460,4 +424,12 @@ const getWatchHistory = asyncHandler(async (req, res) => {
     }
 })
 
-export { registerUser, loginUser, LogOutUser, refreshAccessToken, changeCurrentPassword, getCurrentUser, updateAccountDetails, updateUserAvatar, updateUsercoverImage, changePassword, getUserChannelProfile, getWatchHistory };
+const clearWatchHistory = asyncHandler(async (req, res) => {
+    await User.findByIdAndUpdate(
+        req.user._id,
+        { $set: { watchHistory: [] } }
+    );
+    return res.status(200).json(new apiResponse(200, "Watch history cleared"));
+})
+
+export { registerUser, loginUser, LogOutUser, refreshAccessToken, changeCurrentPassword, getCurrentUser, updateAccountDetails, updateUserAvatar, updateUsercoverImage, changePassword, getUserChannelProfile, getWatchHistory, clearWatchHistory };
